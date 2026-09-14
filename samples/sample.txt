@@ -1,0 +1,2 @@
+pk5d:label=Embryo overview;source=https://example.org/petakit5d/embryo.txt;x=1024;y=512;z=80;c=2;t=180;fps=24;note=Inline byte-language example
+[petakit5d label {Mitotic zone} src {https://example.org/petakit5d/mitotic.md} x 640 y 640 z 48 c 3 t 96 ms 20 note {Tcl-style tag example}]

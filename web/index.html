@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PetaKit5D Timeline Viewer</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="layout">
+      <section class="panel">
+        <h1>PetaKit5D timeline viewer</h1>
+        <p>
+          Static C++/WASM viewer for Tcl-style <code>[petakit5d ...]</code> tags and
+          <code>pk5d:key=value;...</code> byte-language lines.
+        </p>
+        <form id="viewer-form">
+          <label>
+            Remote or inline <code>?q=</code>
+            <input id="query-input" name="q" type="text" placeholder="https://example.org/petakit5d.md or pk5d:..." />
+          </label>
+          <label>
+            Inline <code>&amp;s=</code>
+            <textarea id="string-input" name="s" rows="6" placeholder="[petakit5d label {Embryo} t 180 z 80 c 2 x 1024 y 512 fps 24]"></textarea>
+          </label>
+          <label>
+            Local .txt or .md file
+            <input id="file-input" type="file" accept=".txt,.md,text/plain,text/markdown" />
+          </label>
+          <div class="actions">
+            <button type="submit">Render timeline</button>
+          </div>
+        </form>
+        <p class="hint">
+          The page auto-loads <code>?q=</code> and <code>&amp;s=</code> from the URL. If <code>q</code>
+          is an HTTP(S) link, the viewer fetches it and parses any PetaKit5D tags it contains.
+        </p>
+      </section>
+      <section class="panel">
+        <h2>Timeline</h2>
+        <div id="status">Loading WASM parser…</div>
+        <div id="warnings"></div>
+        <div id="timeline" class="timeline"></div>
+      </section>
+    </main>
+    <script type="module" src="app.js"></script>
+  </body>
+</html>
