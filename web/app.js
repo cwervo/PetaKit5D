@@ -13,6 +13,15 @@ function isHttpUrl(value) {
   return /^https?:\/\//i.test(value.trim());
 }
 
+function safeHttpUrl(value) {
+  try {
+    const parsed = new URL(value, window.location.href);
+    return parsed.protocol === 'http:' || parsed.protocol === 'https:' ? parsed.href : null;
+  } catch {
+    return null;
+  }
+}
+
 function escapeHtml(value) {
   const div = document.createElement('div');
   div.textContent = value;
@@ -34,7 +43,12 @@ function renderResult(result) {
     .map((clip) => {
       const width = Math.max(8, Math.round(((clip.t || 1) / maxFrames) * 100));
       const duration = clip.fps > 0 ? `${(clip.t / clip.fps).toFixed(2)} s` : clip.msPerFrame > 0 ? `${((clip.msPerFrame * clip.t) / 1000).toFixed(2)} s` : 'n/a';
-      const source = clip.source ? `<p><a href="${escapeHtml(clip.source)}" target="_blank" rel="noreferrer">${escapeHtml(clip.source)}</a></p>` : '';
+      const safeSource = clip.source ? safeHttpUrl(clip.source) : null;
+      const source = clip.source
+        ? safeSource
+          ? `<p><a href="${escapeHtml(safeSource)}" target="_blank" rel="noreferrer">${escapeHtml(clip.source)}</a></p>`
+          : `<p>${escapeHtml(clip.source)}</p>`
+        : '';
       return `
         <article class="timeline-card">
           <strong>${escapeHtml(clip.label || 'PetaKit5D clip')}</strong>

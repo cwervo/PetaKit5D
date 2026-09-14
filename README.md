@@ -80,5 +80,5 @@ Open `build-wasm/dist/index.html` with a static file server and pass `?q=` / `&s
 
 See the sample inputs in:
 
-- `/home/runner/work/PetaKit5D/PetaKit5D/samples/sample.txt`
-- `/home/runner/work/PetaKit5D/PetaKit5D/samples/sample.md`
+- `/samples/sample.txt`
+- `/samples/sample.md`

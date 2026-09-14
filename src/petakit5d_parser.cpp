@@ -236,7 +236,38 @@ void parse_inline_payload(const std::string& input, ParseResult& result) {
 
     size_t start = 0;
     while ((start = input.find('[', start)) != std::string::npos) {
-        const size_t end = input.find(']', start + 1);
+        bool in_quotes = false;
+        int brace_depth = 0;
+        size_t end = std::string::npos;
+        for (size_t cursor = start + 1; cursor < input.size(); ++cursor) {
+            const char ch = input[cursor];
+            if (in_quotes) {
+                if (ch == '"') {
+                    in_quotes = false;
+                }
+                continue;
+            }
+            if (brace_depth > 0) {
+                if (ch == '{') {
+                    ++brace_depth;
+                } else if (ch == '}') {
+                    --brace_depth;
+                }
+                continue;
+            }
+            if (ch == '"') {
+                in_quotes = true;
+                continue;
+            }
+            if (ch == '{') {
+                brace_depth = 1;
+                continue;
+            }
+            if (ch == ']') {
+                end = cursor;
+                break;
+            }
+        }
         if (end == std::string::npos) {
             break;
         }
