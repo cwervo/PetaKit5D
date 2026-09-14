@@ -9,10 +9,6 @@ const form = document.getElementById('viewer-form');
 let wasmApi = null;
 let uploadedText = '';
 
-function isHttpUrl(value) {
-  return /^https?:\/\//i.test(value.trim());
-}
-
 function safeHttpUrl(value) {
   try {
     const parsed = new URL(value, window.location.href);
@@ -76,41 +72,42 @@ function parseWithWasm(payload) {
   return JSON.parse(response);
 }
 
-async function loadRemoteText(value) {
-  const response = await fetch(value, { method: 'GET', mode: 'cors' });
-  if (!response.ok) {
-    throw new Error(`Unable to fetch ${value}: ${response.status}`);
+function parseQueryWithWasm(query) {
+  if (!wasmApi) {
+    throw new Error('The PetaKit5D WASM module has not loaded yet.');
   }
-  return response.text();
+  const response = wasmApi.ccall('pk5d_parse_query', 'string', ['string'], [query]);
+  return JSON.parse(response);
 }
 
-async function collectPayload() {
-  const parts = [];
+function mergeResults(base, extra) {
+  return {
+    clips: [...(base.clips || []), ...(extra.clips || [])],
+    warnings: [...(base.warnings || []), ...(extra.warnings || [])],
+  };
+}
+
+function collectQueryString() {
   const qValue = queryInput.value.trim();
   const sValue = stringInput.value.trim();
+  const params = new URLSearchParams();
 
   if (qValue) {
     const safeRemoteUrl = safeHttpUrl(qValue);
-    if (safeRemoteUrl) {
-      parts.push(await loadRemoteText(safeRemoteUrl));
-    } else {
-      parts.push(qValue);
-    }
+    params.set('q', safeRemoteUrl || qValue);
   }
   if (sValue) {
-    parts.push(sValue);
+    params.set('s', sValue);
   }
-  if (uploadedText) {
-    parts.push(uploadedText);
-  }
-  return parts.join('\n');
+  return `?${params.toString()}`;
 }
 
 async function renderFromInputs() {
   statusNode.textContent = 'Rendering timeline…';
   try {
-    const payload = await collectPayload();
-    renderResult(parseWithWasm(payload));
+    const queryResult = parseQueryWithWasm(collectQueryString());
+    const fileResult = uploadedText ? parseWithWasm(uploadedText) : { clips: [], warnings: [] };
+    renderResult(mergeResults(queryResult, fileResult));
     statusNode.textContent = 'Timeline ready.';
   } catch (error) {
     statusNode.textContent = error.message;

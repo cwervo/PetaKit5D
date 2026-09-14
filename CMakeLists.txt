@@ -33,7 +33,7 @@ if(EMSCRIPTEN)
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/dist"
     )
     target_link_options(petakit5d_viewer PRIVATE
-        "-sEXPORTED_FUNCTIONS=['_pk5d_parse','_malloc','_free']"
+        "-sEXPORTED_FUNCTIONS=['_pk5d_parse','_pk5d_parse_query','_malloc','_free']"
         "-sEXPORTED_RUNTIME_METHODS=['ccall','UTF8ToString']"
         "-sALLOW_MEMORY_GROWTH=1"
         "-sENVIRONMENT=web"

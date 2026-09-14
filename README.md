@@ -21,11 +21,12 @@ The viewer accepts metadata from three places:
 
 ## Query-string syntax
 
-`q` and `s` are merged on the client before the C++ parser runs.
+`q` and `s` are decoded by the C++ query parser, and uploaded files are parsed locally as plain text.
 
-- `q=https://.../timeline.md` fetches a remote `.txt` or `.md` document and parses it in the browser
+- `q=https://.../timeline.md` registers a linked remote PetaKit5D source without fetching arbitrary third-party content in the browser
 - `q=pk5d:...` treats `q` as inline byte-language or Tcl-style metadata when it is not an HTTP(S) URL
 - `s=` always treats the value as inline metadata
+- uploaded `.txt` and `.md` files are parsed locally in the browser without contacting a server
 
 Example URLs:
 
@@ -74,7 +75,7 @@ This produces a static site bundle in `build-wasm/dist/` containing:
 - `petakit5d_viewer.js`
 - `petakit5d_viewer.wasm`
 
-Open `build-wasm/dist/index.html` with a static file server and pass `?q=` / `&s=` inputs as needed.
+Open `build-wasm/dist/index.html` with a static file server and pass `?q=` / `&s=` inputs as needed. For remote links, share the URL in `q=` and upload the referenced metadata file when you want the static viewer to parse its contents locally.
 
 ## Text and Markdown examples
 

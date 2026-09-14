@@ -134,6 +134,7 @@ std::vector<std::string> tokenize_tclish(const std::string& input) {
     std::string current;
     bool in_quotes = false;
     int brace_depth = 0;
+    int bracket_depth = 0;
     for (size_t i = 0; i < input.size(); ++i) {
         const char ch = input[i];
         if (in_quotes) {
@@ -143,6 +144,19 @@ std::vector<std::string> tokenize_tclish(const std::string& input) {
                 in_quotes = false;
             } else {
                 current.push_back(ch);
+            }
+            continue;
+        }
+        if (bracket_depth > 0) {
+            current.push_back(ch);
+            if (ch == '[') {
+                ++bracket_depth;
+            } else if (ch == ']') {
+                --bracket_depth;
+                if (bracket_depth == 0) {
+                    tokens.push_back(current);
+                    current.clear();
+                }
             }
             continue;
         }
@@ -184,6 +198,15 @@ std::vector<std::string> tokenize_tclish(const std::string& input) {
                 current.clear();
             }
             brace_depth = 1;
+            continue;
+        }
+        if (ch == '[') {
+            if (!current.empty()) {
+                tokens.push_back(current);
+                current.clear();
+            }
+            bracket_depth = 1;
+            current.push_back(ch);
             continue;
         }
         current.push_back(ch);
@@ -245,6 +268,7 @@ void parse_inline_payload(const std::string& input, ParseResult& result) {
     while ((start = input.find('[', start)) != std::string::npos) {
         bool in_quotes = false;
         int brace_depth = 0;
+        int bracket_depth = 1;
         size_t end = std::string::npos;
         for (size_t cursor = start + 1; cursor < input.size(); ++cursor) {
             const char ch = input[cursor];
@@ -270,9 +294,16 @@ void parse_inline_payload(const std::string& input, ParseResult& result) {
                 brace_depth = 1;
                 continue;
             }
+            if (ch == '[') {
+                ++bracket_depth;
+                continue;
+            }
             if (ch == ']') {
-                end = cursor;
-                break;
+                --bracket_depth;
+                if (bracket_depth == 0) {
+                    end = cursor;
+                    break;
+                }
             }
         }
         if (end == std::string::npos) {
@@ -355,7 +386,7 @@ ParseResult parse_query_payload(const std::string& query) {
             TimelineClip clip;
             clip.label = "Remote PetaKit5D link";
             clip.source = q_it->second;
-            clip.note = "Fetch this .txt or .md resource in the static host and parse it client-side.";
+            clip.note = "Remote URLs are displayed as linked sources; upload the referenced .txt or .md file to parse it locally in the static viewer.";
             result.clips.push_back(clip);
         } else {
             ParseResult parsed = parse_payload(q_it->second);
@@ -370,7 +401,6 @@ ParseResult parse_query_payload(const std::string& query) {
         result.clips.insert(result.clips.end(), parsed.clips.begin(), parsed.clips.end());
         result.warnings.insert(result.warnings.end(), parsed.warnings.begin(), parsed.warnings.end());
     }
-
     return result;
 }
 
