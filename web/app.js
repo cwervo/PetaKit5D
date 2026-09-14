@@ -90,8 +90,9 @@ async function collectPayload() {
   const sValue = stringInput.value.trim();
 
   if (qValue) {
-    if (isHttpUrl(qValue)) {
-      parts.push(await loadRemoteText(qValue));
+    const safeRemoteUrl = safeHttpUrl(qValue);
+    if (safeRemoteUrl) {
+      parts.push(await loadRemoteText(safeRemoteUrl));
     } else {
       parts.push(qValue);
     }

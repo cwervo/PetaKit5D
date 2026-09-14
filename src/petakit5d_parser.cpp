@@ -133,7 +133,7 @@ std::vector<std::string> tokenize_tclish(const std::string& input) {
     std::vector<std::string> tokens;
     std::string current;
     bool in_quotes = false;
-    bool in_braces = false;
+    int brace_depth = 0;
     for (size_t i = 0; i < input.size(); ++i) {
         const char ch = input[i];
         if (in_quotes) {
@@ -146,11 +146,18 @@ std::vector<std::string> tokenize_tclish(const std::string& input) {
             }
             continue;
         }
-        if (in_braces) {
-            if (ch == '}') {
-                tokens.push_back(current);
-                current.clear();
-                in_braces = false;
+        if (brace_depth > 0) {
+            if (ch == '{') {
+                ++brace_depth;
+                current.push_back(ch);
+            } else if (ch == '}') {
+                --brace_depth;
+                if (brace_depth == 0) {
+                    tokens.push_back(current);
+                    current.clear();
+                } else {
+                    current.push_back(ch);
+                }
             } else {
                 current.push_back(ch);
             }
@@ -176,7 +183,7 @@ std::vector<std::string> tokenize_tclish(const std::string& input) {
                 tokens.push_back(current);
                 current.clear();
             }
-            in_braces = true;
+            brace_depth = 1;
             continue;
         }
         current.push_back(ch);

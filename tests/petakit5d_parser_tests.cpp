@@ -43,6 +43,15 @@ void test_tcl_tag_with_bracket_in_braces() {
     require(clip.t == 10 && clip.c == 1, "tcl tag with ] in braces should keep later dimensions");
 }
 
+void test_tcl_tag_with_nested_braces() {
+    const auto result = pk5d::parse_payload(
+        "[petakit5d label {Nested braces} note {outer {inner} text} t 14 c 2]");
+    require(result.clips.size() == 1, "tcl tag with nested braces should still produce one clip");
+    const auto& clip = result.clips.front();
+    require(clip.note == "outer {inner} text", "nested braces should be preserved inside note");
+    require(clip.t == 14 && clip.c == 2, "nested braces should not break later key/value parsing");
+}
+
 void test_query_string() {
     const auto result = pk5d::parse_query_payload(
         "?q=pk5d%3Alabel%3DRemote%20Inline%3Bt%3D10%3Bz%3D5&s=%5Bpetakit5d%20label%20%7BInline%20Tag%7D%20t%2020%20c%202%5D");
@@ -58,6 +67,7 @@ int main() {
     test_byte_language();
     test_tcl_tag();
     test_tcl_tag_with_bracket_in_braces();
+    test_tcl_tag_with_nested_braces();
     test_query_string();
     std::cout << "All parser tests passed\n";
     return 0;
